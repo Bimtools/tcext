@@ -48,6 +48,10 @@ const SelectionFilter = () => {
                 { "PART.PROFILE": fieldValue },
                 { "PART.GUID": fieldValue },
                 { "ASSEMBLY.GUID": fieldValue },
+                { "IfcMaterial.Material": fieldValue },
+                { "Material.Name": fieldValue },
+                { "IfcBeamType.Name": fieldValue },
+                { "Tekla Common.Class": fieldValue },
               ];
               var objectProperties = [];
               for (const item of propertyNames) {
@@ -63,81 +67,121 @@ const SelectionFilter = () => {
                     x.modelId,
                     [...ids]
                   );
-
                   for (const k of properties) {
+                    console.log(k);
+                    let position = "";
+                    let key = "";
+                    let name = k.product.name;
+                    let partPos = "";
+                    let assemblyPos = "";
+                    let profile = "";
+                    let material = "";
+                    let weight = 0;
+                    let length = 0;
                     for (const g of k.properties) {
-                      if (g.name !== "ASSEMBLY" && g.name !== "PART") continue;
-                      const type = g.name;
-                      var key = "";
-                      var name = "";
-                      var partPos = "";
-                      var assemblyPos = "";
-                      var profile = "";
-                      var material = "";
-                      var weight = 0;
-                      var length = 0;
-                      if (type === "ASSEMBLY") {
-                        for (const f of g.properties) {
-                          if (f.name === "NAME") name = f.value;
-                          if (f.name === "PART_POS") partPos = f.value;
-                          if (f.name === "ASSEMBLY_POS") {
-                            assemblyPos = f.value;
-                            key = f.value;
-                          }
-                          if (f.name === "MAINPART.PROFILE") profile = f.value;
-                          if (f.name === "WEIGHT") weight = f.value;
-                          if (f.name === "LENGTH") length = f.value;
+                      for (const f of g.properties) {
+                        if (f.name.toUpperCase().includes("GUID") && key === "")
+                          key = f.value;
+                        if (
+                          f.name.toUpperCase().includes("NAME") &&
+                          name === ""
+                        )
+                          name = f.value;
+                        if (
+                          f.name.toUpperCase().includes("PART_POS") &&
+                          partPos === ""
+                        )
+                          partPos = f.value;
+                        if (
+                          f.name.toUpperCase().includes("ASSEMBLY_POS") &&
+                          assemblyPos === ""
+                        ) {
+                          assemblyPos = f.value;
+                          position = f.value;
                         }
-                      } else if (type == "PART") {
-                        for (const f of g.properties) {
-                          if (f.name === "NAME") name = f.value;
-                          if (f.name === "PART_POS") {
-                            key = f.value;
-                            partPos = f.value;
-                          }
-                          if (f.name === "ASSEMBLY_POS") assemblyPos = f.value;
-                          if (f.name === "PROFILE") profile = f.value;
-                          if (f.name === "WEIGHT") weight = f.value;
-                          if (f.name === "LENGTH") length = f.value;
-                          if (f.name === "MATERIAL") material = f.value;
-                        }
-                      }
-                      const index1 = objectProperties.findIndex(
-                        (x) =>
-                          x.type === "ASSEMBLY" && x.assemblyPos === assemblyPos
-                      );
-                      const index2 = objectProperties.findIndex(
-                        (x) => x.type === "PART" && x.partPos === partPos
-                      );
-
-                      if (
-                        (index1 < 0 && type === "ASSEMBLY") ||
-                        (index2 < 0 && type === "PART")
-                      ) {
-                        objectProperties.push({
-                          key: partPos+assemblyPos,
-                          label: `${type}: ${key}`,
-                          children: (
-                            <>
-                              <ul
-                                tyle={{
-                                  paddingLeft: "20px",
-                                  textAlign: "left",
-                                }}
-                              >
-                                <li key="1">{`Part Position: ${partPos}`}</li>
-                                <li key="2">{`Assembly Position: ${assemblyPos}`}</li>
-                                <li key="3">{`Name: ${name}`}</li>
-                                <li key="4">{`Profile: ${profile}`}</li>
-                                <li key="5">{`Material: ${material}`}</li>
-                                <li key="6">{`Weight: ${weight}`}</li>
-                                <li key="7">{`Length: ${length}`}</li>
-                              </ul>
-                            </>
-                          ),
-                        });
+                        if (
+                          f.name.toUpperCase().includes("MAINPART.PROFILE") &&
+                          profile === ""
+                        )
+                          profile = f.value;
+                        if (
+                          f.name.toUpperCase().includes("WEIGHT") &&
+                          weight === ""
+                        )
+                          weight = f.value;
+                        if (
+                          f.name.toUpperCase().includes("LENGTH") &&
+                          length === ""
+                        )
+                          length = f.value;
                       }
                     }
+                    console.log(name)
+
+                    objectProperties.push({
+                      key: key,
+                      label: `${position}`,
+                      children: (
+                        <>
+                          <ul
+                            tyle={{
+                              paddingLeft: "20px",
+                              textAlign: "left",
+                            }}
+                          >
+                            <li
+                              tyle={{
+                                paddingLeft: "20px",
+                                textAlign: "left",
+                              }}
+                              key="1"
+                            >{`Part Position: ${partPos}`}</li>
+                            <li
+                              tyle={{
+                                paddingLeft: "20px",
+                                textAlign: "left",
+                              }}
+                              key="2"
+                            >{`Assembly Position: ${assemblyPos}`}</li>
+                            <li
+                              tyle={{
+                                paddingLeft: "20px",
+                                textAlign: "left",
+                              }}
+                              key="3"
+                            >{`Name: ${name}`}</li>
+                            <li
+                              tyle={{
+                                paddingLeft: "20px",
+                                textAlign: "left",
+                              }}
+                              key="4"
+                            >{`Profile: ${profile}`}</li>
+                            <li
+                              tyle={{
+                                paddingLeft: "20px",
+                                textAlign: "left",
+                              }}
+                              key="5"
+                            >{`Material: ${material}`}</li>
+                            <li
+                              tyle={{
+                                paddingLeft: "20px",
+                                textAlign: "left",
+                              }}
+                              key="6"
+                            >{`Weight: ${weight}`}</li>
+                            <li
+                              tyle={{
+                                paddingLeft: "20px",
+                                textAlign: "left",
+                              }}
+                              key="7"
+                            >{`Length: ${length}`}</li>
+                          </ul>
+                        </>
+                      ),
+                    });
                   }
                   await tcapi.viewer.setSelection(
                     {
