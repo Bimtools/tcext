@@ -1,4 +1,12 @@
-import { Button, Card, Collapse, Divider, Input, Typography } from "antd";
+import {
+  Button,
+  Card,
+  Collapse,
+  Divider,
+  Input,
+  message,
+  Typography,
+} from "antd";
 import React, { useEffect, useState } from "react";
 import * as WorkspaceAPI from "trimble-connect-workspace-api";
 import { ObjectView } from "react-object-view";
@@ -7,6 +15,46 @@ const { Text } = Typography;
 const SelectionFilter = () => {
   const [fieldValue, setFieldValue] = useState("");
   const [properties, setProperties] = useState([]);
+  React.useEffect(() => {
+    async function fetchData() {
+      const url = window.location.href;
+      const ifcGuid = url.split("?")[1];
+      const tcapi = await WorkspaceAPI.connect(window.parent);
+      var modelObjects;
+      do {
+        modelObjects = await tcapi.viewer.getObjects();
+      } while (modelObjects === undefined || modelObjects.length === 0);
+      const runtimeIds = await tcapi.viewer.convertToObjectRuntimeIds(
+        modelObjects[0].modelId,
+        [ifcGuid]
+      );
+      const asm = runtimeIds[0];
+      const modelId = modelObjects[0].modelId;
+      tcapi.viewer.setCamera({
+        modelObjectIds: [
+          {
+            modelId: modelId,
+            objectRuntimeIds: [asm],
+          },
+        ],
+      });
+      tcapi.viewer.setSelection({
+        modelObjectIds: [
+          {
+            modelId: modelId,
+            objectRuntimeIds: [asm],
+          },
+        ],
+      });
+      tcapi.viewer.isolateEntities([
+        {
+          modelId: modelId,
+          entityIds: [asm],
+        },
+      ]);
+    }
+    fetchData();
+  }, []);
   return (
     <>
       <div
